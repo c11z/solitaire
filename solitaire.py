@@ -36,6 +36,7 @@ class Solitaire():
             self.key = key
         else:
             self.key = self.generate_key()
+        self.deck = self.key
 
     def generate_key(self):
         """Uses pseudo random number generator to create inferior keys for the
@@ -68,6 +69,9 @@ class Solitaire():
         """Contert list of numbers to letters, 1=A, 2=B etc convert to a
         string, stick with 5 character groups.
         """
+        pass
+
+    def _solitaire(self):
         pass
 
     def encode(self, msg):
