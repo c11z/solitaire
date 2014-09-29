@@ -32,8 +32,8 @@ import argparse
 class Solitaire():
     """Output-feedback mode stream cypher designed around a deck of cards."""
     def __init__(self, key=None):
-        if key:
-            self.key = key
+        if key and self._valid_key(key):
+            self.key = tuple(key)
         else:
             self.key = self.generate_key()
         self.deck = self.key
