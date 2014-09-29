@@ -59,17 +59,44 @@ class Solitaire():
         """Returns the key in list form."""
         return self.key
 
-    def _enumerate(self, st):
+    def _enumerate(self, plain_text):
         """Capitalize and convert a string into a list of numbers,
         A=1, B=2 etc
         """
-        pass
+        char_list = []
+        for c in list(plain_text):
+            num = ord(c)
+            if 65 <= num <= 90:  # This is a capital alpha character
+                char_list.append(num - 64)
+            elif 97 <= num <= 122:  # This is a lower alpha character
+                # Convert to capital character
+                char_list.append(num - 96)
+            # else this is a non alpha and is ignored.
+        return char_list
 
-    def _characterize(self, li):
-        """Contert list of numbers to letters, 1=A, 2=B etc convert to a
+    def _characterize(self, char_list):
+        """Convert list of numbers to letters, 1=A, 2=B etc convert to a
         string, stick with 5 character groups.
         """
-        pass
+        plain_text = ''
+        for i in char_list:
+            # Add back 64 to map into capital alpha characters.
+            plain_text += chr(i + 64)
+        return plain_text
+
+    def _scramble(self, i, key):
+        """"Takes the integer representation of a character of the plaintext
+        message {i} and performs the addition modulo 26 step with the keystream
+        modifier {key}.
+        """
+        return (i + key) % 26
+
+    def clarify(self, i, key):
+        """Takes the integer representation of a character of the encoded
+        message {i} and performs the subtraction modulo 26 step with the
+        keystream modifier {key}.
+        """
+        return (i - key) % 26
 
     def _solitaire(self):
         pass
