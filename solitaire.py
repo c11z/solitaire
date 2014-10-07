@@ -31,6 +31,7 @@ import argparse
 
 class Solitaire():
     """Output-feedback mode stream cypher designed around a deck of cards."""
+
     def __init__(self, key=None):
         if key and self._valid_key(key):
             self.key = tuple(key)
@@ -43,7 +44,7 @@ class Solitaire():
         lazy, also emits warning recommending the user to go shuffle a pack of
         cards.
         """
-        pass
+        return range(54)
 
     def _valid_key(self):
         """Returns True is key is valid else false."""
@@ -59,18 +60,39 @@ class Solitaire():
         """Returns the key in list form."""
         return self.key
 
+    def get_deck(self):
+        """Converts the key to a representation that can be used to easily be
+        saved as the order of a standard deck of cards.
+        """
+        conv = {0: 'AC', 1: '2C', 2: '3C', 3: '4C', 4: '5C', 5: '6C', 6: '7C',
+                7: '8C', 8: '9C', 9: '10C', 10: 'JC', 11: 'QC', 12: 'KC',
+                13: 'AD', 14: '2D', 15: '3D', 16: '4D', 17: '5D', 18: '6D',
+                19: '7D', 20: '8D', 21: '9D', 22: '10D', 23: 'JD', 24: 'QD',
+                25: 'KD', 26: 'AH', 27: '2H', 28: '3H', 29: '4H', 30: '5H',
+                31: '6H', 32: '7H', 33: '8H', 34: '9H', 35: '10H', 36: 'JH',
+                37: 'QH', 38: 'KH', 39: 'AS', 40: '2S', 41: '3S', 42: '4S',
+                43: '5S', 44: '6S', 45: '7S', 46: '8S', 47: '9S', 48: '10S',
+                49: 'JS', 50: 'QS', 51: 'KS', 52: 'J0', 53: 'J1'}
+
+        result = []
+        for i in self.key:
+            result.append(conv[i])
+        return result
+
     def _enumerate(self, plain_text):
         """Capitalize and convert a string into a list of numbers,
-        A=1, B=2 etc
+        A=0, B=1 etc
         """
         char_list = []
         for c in list(plain_text):
             num = ord(c)
             if 65 <= num <= 90:  # This is a capital alpha character
-                char_list.append(num - 64)
+                # (-)65 to normalize so that modulo 26 works.
+                char_list.append(num - 65)
             elif 97 <= num <= 122:  # This is a lower alpha character
-                # Convert to capital character
-                char_list.append(num - 96)
+                # (-)32 for conversion to a capital letter and (-)65 for
+                # normailization
+                char_list.append(num - 32 - 65)
             # else this is a non alpha and is ignored.
         return char_list
 
@@ -80,8 +102,8 @@ class Solitaire():
         """
         plain_text = ''
         for i in char_list:
-            # Add back 64 to map into capital alpha characters.
-            plain_text += chr(i + 64)
+            # Add back 65 to map into capital alpha characters.
+            plain_text += chr(i + 65)
         return plain_text
 
     def _scramble(self, i, key):
@@ -91,7 +113,7 @@ class Solitaire():
         """
         return (i + key) % 26
 
-    def clarify(self, i, key):
+    def _clarify(self, i, key):
         """Takes the integer representation of a character of the encoded
         message {i} and performs the subtraction modulo 26 step with the
         keystream modifier {key}.
@@ -99,7 +121,6 @@ class Solitaire():
         return (i - key) % 26
 
     def _solitaire(self):
-        pass
 
     def encode(self, msg):
         pass
@@ -109,6 +130,7 @@ class Solitaire():
 
 
 class TestSolitaire():
+
     def test_generate_key():
         pass
 
