@@ -49,11 +49,11 @@ class Solitaire():
         """
         return range(54)
 
-    def _valid_key(self):
+    def _valid_key(self, key):
         """Returns True is key is valid else false."""
         pass
 
-    def input_key():
+    def input_key(self):
         """A facilitated method of inputing the key, taking each card one at a
         time and fuzzy matching and validating the set in real time.
         """
