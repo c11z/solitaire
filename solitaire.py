@@ -37,7 +37,10 @@ class Solitaire():
             self.key = tuple(key)
         else:
             self.key = self.generate_key()
-        self.deck = self.key
+        self.deck = list(self.key)
+        # Store indexes of jokers so we don't have to look them up all the time
+        self.j0_index = self.deck.index(52)
+        self.j1_index = self.deck.index(53)
 
     def generate_key(self):
         """Uses pseudo random number generator to create inferior keys for the
