@@ -123,7 +123,54 @@ class Solitaire():
         """
         return (i - key) % 26
 
+    def _move_jokers(self):
+        """Moves the j0 joker one place and the j1 joker two places wrapping
+        the deck if at the end.
+        """
+        # Move j0 first.
+        new_index = (self.j0_index + 1) % 54
+        self.deck.insert(new_index, self.deck.pop(self.j0_index))
+        self.j0_index = new_index
+        # Move j1 second.
+        new_index = (self.j1_index + 2) % 54
+        self.deck.insert(new_index, self.deck.pop(self.j1_index))
+        self.j1_index = new_index
+
+    def _triple_cut(self):
+        """Determine cutpoints by isolating cards before the first joken and
+        after the second find top, middle and bottom of deck. Then swap top
+        and bottom.
+        """
+        #Determine cut points
+        cut_point1 = min(self.j0_index, self.j1_index)
+        cut_point2 = max(self.j0_index, self.j1_index) + 1
+        top = self.deck[:cut_point1]
+        middle = self.deck[cut_point1:cut_point2]
+        bottom = self.deck[cut_point2:]
+        self.deck = bottom + middle + top
+
+    def _count_cut(self):
+        """Look at the bottom card cound down from the top card that number,
+        cut after that card leaving the bottom card on the bottom. If the
+        bottom card is a joker do nothing.
+        """
+        if self.j0_index == 53 or self.j1_index == 53:
+            return
+        else:
+            bottom_card = self.deck.pop[-1]
+            # Count down from bottom card but cut after that point.
+            cut_point = bottom_card + 1
+            top, bottom = self.deck[:cut_point], self.deck[cut_point:]
+            self.deck = bottom + top + bottom_card
+            # Is there a better way to figure out the new joker indexes?
+            self.j0_index = self.deck.index(52)
+            self.j1_index = self.deck.index(53)
+
     def _solitaire(self):
+        self._move_jokers()
+        self._triple_cut()
+        self._count_cut()
+        output = self.deck[self.deck[0]]
 
     def encode(self, msg):
         pass
@@ -133,17 +180,24 @@ class Solitaire():
 
 
 class TestSolitaire():
-
-    def test_generate_key():
+    """Test Class for solitaire program."""
+    def __init__(self):
         pass
 
-    def test_get_key():
+    def test_generate_key(self):
+        """Tests Generate key method."""
         pass
 
-    def test_encode():
+    def test_get_key(self):
+        """Tests get key method."""
         pass
 
-    def test_decode():
+    def test_encode(self):
+        """Tests encode method."""
+        pass
+
+    def test_decode(self):
+        """Tests decode method."""
         pass
 
 if __name__ == '__main__':
