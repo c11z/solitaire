@@ -87,8 +87,8 @@ class Solitaire():
         A=0, B=1 etc
         """
         char_list = []
-        for c in list(plain_text):
-            num = ord(c)
+        for character in list(plain_text):
+            num = ord(character)
             if 65 <= num <= 90:  # This is a capital alpha character
                 # (-)65 to normalize so that modulo 26 works.
                 char_list.append(num - 65)
