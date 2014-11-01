@@ -167,10 +167,11 @@ class Solitaire():
             self.j1_index = self.deck.index(53)
 
     def _solitaire(self):
+        """Plays the game of solitaire, generating one keystream character."""
         self._move_jokers()
         self._triple_cut()
         self._count_cut()
-        output = self.deck[self.deck[0]]
+        return self.deck[self.deck[0]]
 
     def encode(self, msg):
         pass
