@@ -27,6 +27,7 @@ dec_msg = solitaire.decrypt(enc_msg)
 assert ''.join.split(msg.upper()) == ''.join.split(dec_msg)
 """
 import argparse
+import pytest
 
 
 class Solitaire():
@@ -38,16 +39,15 @@ class Solitaire():
         else:
             self.key = self.generate_key()
         self.deck = list(self.key)
-        # Store indexes of jokers so we don't have to look them up all the time
-        self.j0_index = self.deck.index(52)
-        self.j1_index = self.deck.index(53)
+        self.J0 = 53
+        self.J1 = 54
 
     def generate_key(self):
         """Uses pseudo random number generator to create inferior keys for the
         lazy, also emits warning recommending the user to go shuffle a pack of
         cards.
         """
-        return range(54)
+        return range(1, 55)
 
     def _valid_key(self, key):
         """Returns True is key is valid else false."""
@@ -67,15 +67,15 @@ class Solitaire():
         """Converts the key to a representation that can be used to easily be
         saved as the order of a standard deck of cards.
         """
-        conv = {0: 'AC', 1: '2C', 2: '3C', 3: '4C', 4: '5C', 5: '6C', 6: '7C',
-                7: '8C', 8: '9C', 9: '10C', 10: 'JC', 11: 'QC', 12: 'KC',
-                13: 'AD', 14: '2D', 15: '3D', 16: '4D', 17: '5D', 18: '6D',
-                19: '7D', 20: '8D', 21: '9D', 22: '10D', 23: 'JD', 24: 'QD',
-                25: 'KD', 26: 'AH', 27: '2H', 28: '3H', 29: '4H', 30: '5H',
-                31: '6H', 32: '7H', 33: '8H', 34: '9H', 35: '10H', 36: 'JH',
-                37: 'QH', 38: 'KH', 39: 'AS', 40: '2S', 41: '3S', 42: '4S',
-                43: '5S', 44: '6S', 45: '7S', 46: '8S', 47: '9S', 48: '10S',
-                49: 'JS', 50: 'QS', 51: 'KS', 52: 'J0', 53: 'J1'}
+        conv = {1: 'AC', 2: '2C', 3: '3C', 4: '4C', 5: '5C', 6: '6C', 7: '7C',
+                8: '8C', 9: '9C', 10: '10C', 11: 'JC', 12: 'QC', 13: 'KC',
+                14: 'AD', 15: '2D', 16: '3D', 17: '4D', 18: '5D', 19: '6D',
+                20: '7D', 21: '8D', 22: '9D', 23: '10D', 24: 'JD', 25: 'QD',
+                26: 'KD', 27: 'AH', 28: '2H', 29: '3H', 30: '4H', 31: '5H',
+                32: '6H', 33: '7H', 34: '8H', 35: '9H', 36: '10H', 37: 'JH',
+                38: 'QH', 39: 'KH', 40: 'AS', 41: '2S', 42: '3S', 43: '4S',
+                44: '5S', 45: '6S', 46: '7S', 47: '8S', 48: '9S', 49: '10S',
+                50: 'JS', 51: 'QS', 52: 'KS', 53: 'J0', 54: 'J1'}
 
         result = []
         for i in self.key:
@@ -84,19 +84,22 @@ class Solitaire():
 
     def _enumerate(self, plain_text):
         """Capitalize and convert a string into a list of numbers,
-        A=0, B=1 etc
+        A=1, B=2 etc
         """
         char_list = []
         for character in list(plain_text):
             num = ord(character)
             if 65 <= num <= 90:  # This is a capital alpha character
                 # (-)65 to normalize so that modulo 26 works.
-                char_list.append(num - 65)
+                char_list.append(num - 64)
             elif 97 <= num <= 122:  # This is a lower alpha character
                 # (-)32 for conversion to a capital letter and (-)65 for
                 # normailization
-                char_list.append(num - 32 - 65)
+                char_list.append(num - 32 - 64)
             # else this is a non alpha and is ignored.
+        # Pad message with X's (23) for groups of 5
+        if (len(char_list) % 5) != 0:
+           char_list += [23] * (5 - (len(plain_text) % 5))
         return char_list
 
     def _characterize(self, char_list):
@@ -106,7 +109,8 @@ class Solitaire():
         plain_text = ''
         for i in char_list:
             # Add back 65 to map into capital alpha characters.
-            plain_text += chr(i + 65)
+            plain_text += chr(i + 64)
+        plain_text = ' '.join(plain_text[i:i + 5] for i in range(0, len(plain_text), 5))
         return plain_text
 
     def _scramble(self, i, key):
@@ -114,27 +118,34 @@ class Solitaire():
         message {i} and performs the addition modulo 26 step with the keystream
         modifier {key}.
         """
-        return (i + key) % 26
+        if key > 26:
+            key -= 26
+        value = i + key
+        if value > 26:
+            value -= 26
+        return value
 
     def _clarify(self, i, key):
         """Takes the integer representation of a character of the encoded
         message {i} and performs the subtraction modulo 26 step with the
         keystream modifier {key}.
         """
-        return (i - key) % 26
+        if key > 26:
+            key -= 26
+        value = i - key
+        if value < 1:
+            value += 26
+        return value
 
-    def _move_jokers(self):
-        """Moves the j0 joker one place and the j1 joker two places wrapping
-        the deck if at the end.
+    def _move_card(self, card, places):
+        """Moves card in deck a certain number of places, card wraps around
+        deck if it goes past the end.
         """
-        # Move j0 first.
-        new_index = (self.j0_index + 1) % 54
-        self.deck.insert(new_index, self.deck.pop(self.j0_index))
-        self.j0_index = new_index
-        # Move j1 second.
-        new_index = (self.j1_index + 2) % 54
-        self.deck.insert(new_index, self.deck.pop(self.j1_index))
-        self.j1_index = new_index
+        index = self.deck.index(card)
+        new_index = index + places
+        if new_index > 53:
+            new_index -= 53
+        self.deck.insert(new_index, self.deck.pop(index))
 
     def _triple_cut(self):
         """Determine cutpoints by isolating cards before the first joken and
@@ -142,8 +153,10 @@ class Solitaire():
         and bottom.
         """
         #Determine cut points
-        cut_point1 = min(self.j0_index, self.j1_index)
-        cut_point2 = max(self.j0_index, self.j1_index) + 1
+        j0_index = self.deck.index(self.J0)
+        j1_index = self.deck.index(self.J1)
+        cut_point1 = min(j0_index, j1_index)
+        cut_point2 = max(j0_index, j1_index) + 1
         top = self.deck[:cut_point1]
         middle = self.deck[cut_point1:cut_point2]
         bottom = self.deck[cut_point2:]
@@ -154,50 +167,76 @@ class Solitaire():
         cut after that card leaving the bottom card on the bottom. If the
         bottom card is a joker do nothing.
         """
-        if self.j0_index == 53 or self.j1_index == 53:
+        if self.deck[-1] == self.J0 or self.deck[-1] == self.J1:
             return
         else:
-            bottom_card = self.deck.pop[-1]
+            bottom_card = self.deck.pop()
+            # Nobody likes an out of range index; treat J1 like J0.
+            if bottom_card == self.J1:
+                cut_point = self.J0
+            else:
+                cut_point = bottom_card
             # Count down from bottom card but cut after that point.
-            cut_point = bottom_card + 1
             top, bottom = self.deck[:cut_point], self.deck[cut_point:]
-            self.deck = bottom + top + bottom_card
-            # Is there a better way to figure out the new joker indexes?
-            self.j0_index = self.deck.index(52)
-            self.j1_index = self.deck.index(53)
+            self.deck = bottom + top + [bottom_card]
 
     def _solitaire(self):
         """Plays the game of solitaire, generating one keystream character."""
-        self._move_jokers()
+        self._move_card(self.J0, 1)
+        self._move_card(self.J1, 2)
         self._triple_cut()
         self._count_cut()
-        return self.deck[self.deck[0]]
+        top_card = self.deck[0]
+        # Nobody likes an out of range index; treat J1 like J0.
+        if top_card == self.J1:
+            top_card = self.J0
+        key = self.deck[top_card]
+        # If the keystream card is a joker then start over from step one.
+        if key == self.J0 or key == self.J1:
+            return self._solitaire()
+        else:
+            return key
 
     def encode(self, msg):
-        pass
+        """Takes a string message and encodes it."""
+        enc = []
+        for element in self._enumerate(msg):
+            key = self._solitaire()
+            enc.append(self._scramble(element, key))
+        return self._characterize(enc)
 
-    def decode(self, msg):
-        pass
+    def decode(self, enc):
+        """Take a string encoded message and decodes it."""
+        msg = []
+        for element in self._enumerate(enc):
+            key = self._solitaire()
+            msg.append(self._clarify(element, key))
+        return self._characterize(msg)
 
 
 class TestSolitaire():
     """Test Class for solitaire program."""
-    def __init__(self):
-        pass
-
-    def test_generate_key(self):
-        """Tests Generate key method."""
-        pass
-
-    def test_get_key(self):
-        """Tests get key method."""
-        pass
 
     def test_encode(self):
         """Tests encode method."""
-        pass
+        solitaire = Solitaire()
+        msg = 'AAAAA AAAAA'
+        enc = solitaire.encode(msg)
+        assert enc == 'EXKYI ZSGEH'
 
     def test_decode(self):
+        """Tests Generate key method."""
+        solitaire = Solitaire()
+        msg = 'EXKYI ZSGEH'
+        enc = solitaire.decode(msg)
+        assert enc == 'AAAAA AAAAA'
+
+    def test_get_key(self):
+        """Tests get key method."""
+        solitaire = Solitaire()
+        assert range(1, 55) == solitaire.get_key()
+
+    def test_generate_key(self):
         """Tests decode method."""
         pass
 
