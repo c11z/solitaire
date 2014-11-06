@@ -28,30 +28,58 @@ assert ''.join.split(msg.upper()) == ''.join.split(dec_msg)
 """
 import argparse
 import pytest
-
+from random import shuffle
 
 class Solitaire():
     """Output-feedback mode stream cypher designed around a deck of cards."""
 
-    def __init__(self, key=None):
-        if key and self._valid_key(key):
+    def __init__(self, key=None, passphrase=None):
+        self.J0 = 53
+        self.J1 = 54
+        if key is not None and self._valid_key(key):
             self.key = tuple(key)
+        elif passphrase is not None:
+            self.key = self.use_passphrase(passphrase)
         else:
             self.key = self.generate_key()
         self.deck = list(self.key)
-        self.J0 = 53
-        self.J1 = 54
+
 
     def generate_key(self):
         """Uses pseudo random number generator to create inferior keys for the
         lazy, also emits warning recommending the user to go shuffle a pack of
         cards.
         """
+        # self.deck = list(range(1, 55))
+        # return tuple(shuffle(self.deck))
         return range(1, 55)
+
+    def use_passphrase(self, passphrase_source):
+        """Use a passphrase to order the deck. This method uses the Solitaire
+        algorithm to create an initial deck ordering. Both the sender and
+        receiver share a passphrase.
+        """
+        passphrase = self._enumerate(passphrase_source)
+        # if len(passphrase) < 64:
+        #     raise Exception("There are only 1.4 bits of randomness per \
+        #                      character in standard English. Please use \
+        #                      at least a 64 character passphrase.")
+        self.deck = list(range(1, 55))
+        for element in passphrase:
+            self._move_card(self.J0, 1)
+            self._move_card(self.J1, 2)
+            self._triple_cut()
+            self._count_cut()
+            self._count_cut(element)
+        return tuple(self.deck)
 
     def _valid_key(self, key):
         """Returns True is key is valid else false."""
-        pass
+        key = set(key)
+        for i in range(1, 55):
+            if i not in key:
+                return False
+        return True
 
     def input_key(self):
         """A facilitated method of inputing the key, taking each card one at a
@@ -162,7 +190,7 @@ class Solitaire():
         bottom = self.deck[cut_point2:]
         self.deck = bottom + middle + top
 
-    def _count_cut(self):
+    def _count_cut(self, manual_cut_point=None):
         """Look at the bottom card cound down from the top card that number,
         cut after that card leaving the bottom card on the bottom. If the
         bottom card is a joker do nothing.
@@ -171,8 +199,11 @@ class Solitaire():
             return
         else:
             bottom_card = self.deck.pop()
+            # Allow manual cut point for key generation using passphrase.
+            if manual_cut_point is not None:
+                cut_point = manual_cut_point
             # Nobody likes an out of range index; treat J1 like J0.
-            if bottom_card == self.J1:
+            elif bottom_card == self.J1:
                 cut_point = self.J0
             else:
                 cut_point = bottom_card
@@ -192,6 +223,7 @@ class Solitaire():
             top_card = self.J0
         key = self.deck[top_card]
         # If the keystream card is a joker then start over from step one.
+        print(key)
         if key == self.J0 or key == self.J1:
             return self._solitaire()
         else:
@@ -236,9 +268,11 @@ class TestSolitaire():
         solitaire = Solitaire()
         assert range(1, 55) == solitaire.get_key()
 
-    def test_generate_key(self):
+    def test_use_passphrase(self):
         """Tests decode method."""
-        pass
+        solitaire = Solitaire(passphrase='foo')
+        enc = solitaire.encode('AAAAA AAAAA AAAAA')
+        assert enc == 'ITHZU JIWGR FARMW'
 
 if __name__ == '__main__':
     # parse arguments for command line usage
