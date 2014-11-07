@@ -228,28 +228,61 @@ class TestSolitaire():
 
     def test_encode(self):
         """Tests encode method."""
-        solitaire = Solitaire()
+        key = list(range(1, 55))
+        solitaire = Solitaire(key)
         msg = 'AAAAA AAAAA'
         enc = solitaire.encode(msg)
         assert enc == 'EXKYI ZSGEH'
 
     def test_decode(self):
         """Tests Generate key method."""
-        solitaire = Solitaire()
+        key = list(range(1, 55))
+        solitaire = Solitaire(key)
         msg = 'EXKYI ZSGEH'
         enc = solitaire.decode(msg)
         assert enc == 'AAAAA AAAAA'
 
     def test_get_key(self):
         """Tests get key method."""
-        solitaire = Solitaire()
-        assert range(1, 55) == solitaire.get_key()
+        key = list(range(1, 55))
+        solitaire = Solitaire(key)
+        assert tuple(range(1, 55)) == solitaire.get_key()
+
+    def test_get_deck(self):
+        """"Tests get deck method."""
+        solitaire = Solitaire(passphrase='foo')
+        solitaire.get_deck()
+        print(solitaire.get_deck())
+        deck = ['JS', 'QS', '3C', '4C', '5C', '6C', '7C', 'AC', '10C', 'JC',
+                'QC', 'KS', '2D', '3D', '4D', '5D', '6D', '7D', '8D', '2C',
+                'JD', 'QD', 'KD', 'AH', '2H', '3H', '4H', '5H', '6H', '7H',
+                '8H', '9H', '10H', 'JH', 'QH', 'KH', 'AS', '8C', 'J0', 'KC',
+                'AD', '9D', '10D', 'J1', '2S', '3S', '4S', '5S', '6S', '7S',
+                '8S', '9S', '10S', '9C']
+        assert deck == solitaire.get_deck()
 
     def test_use_passphrase(self):
         """Tests decode method."""
         solitaire = Solitaire(passphrase='foo')
         enc = solitaire.encode('AAAAA AAAAA AAAAA')
-        assert enc == 'ITHZU JIWGR FARMW'
+        print(solitaire.get_key())
+        key = (50, 51, 3, 4, 5, 6, 7, 1, 10, 11, 12, 52, 15, 16, 17, 18, 19,
+               20, 21, 2, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+               37, 38, 39, 40, 8, 53, 13, 14, 22, 23, 54, 41, 42, 43, 44, 45,
+               46, 47, 48, 49, 9)
+        assert key == solitaire.get_key()
+        assert enc == 'TIKJJ RQZRK BBZNA'
+
+    def test_mary_had_a_little_lamb(self):
+        passphrase = 'cryptonomicon'
+        solitaire = Solitaire(passphrase=passphrase)
+        # print(solitaire.get_key())
+        # print(solitaire.get_deck())
+        msg = 'Oh Mary had a little lambabcde'
+        enc_msg = solitaire.encode(msg)
+        dec_msg = solitaire.decode(enc_msg)
+        assert ''.join(msg.upper().split()) == ''.join(dec_msg.split())
+
 
 if __name__ == '__main__':
     pytest.main('solitaire.py')
