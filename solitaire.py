@@ -31,18 +31,8 @@ class Solitaire():
         elif passphrase is not None:
             self.key = self.use_passphrase(passphrase)
         else:
-            self.key = self.generate_key()
+            raise('Error Invalid Key')
         self.deck = list(self.key)
-
-
-    def generate_key(self):
-        """Uses pseudo random number generator to create inferior keys for the
-        lazy, also emits warning recommending the user to go shuffle a pack of
-        cards.
-        """
-        # self.deck = list(range(1, 55))
-        # return tuple(shuffle(self.deck))
-        return range(1, 55)
 
     def use_passphrase(self, passphrase_source):
         """Use a passphrase to order the deck. This method uses the Solitaire
@@ -50,10 +40,11 @@ class Solitaire():
         receiver share a passphrase.
         """
         passphrase = self._enumerate(passphrase_source)
-        # if len(passphrase) < 64:
-        #     raise Exception("There are only 1.4 bits of randomness per \
-        #                      character in standard English. Please use \
-        #                      at least a 64 character passphrase.")
+        if len(passphrase) < 64:
+            print('Warning: There are only 1.4 bits of randomness per '
+                  'character in standard English. Please use at least a 64 '
+                  'character passphrase.')
+
         self.deck = list(range(1, 55))
         for element in passphrase:
             self._move_card(self.J0, 1)
@@ -70,12 +61,6 @@ class Solitaire():
             if i not in key:
                 return False
         return True
-
-    def input_key(self):
-        """A facilitated method of inputing the key, taking each card one at a
-        time and fuzzy matching and validating the set in real time.
-        """
-        pass
 
     def get_key(self):
         """Returns the key in list form."""
@@ -117,7 +102,7 @@ class Solitaire():
             # else this is a non alpha and is ignored.
         # Pad message with X's (23) for groups of 5
         if (len(char_list) % 5) != 0:
-           char_list += [23] * (5 - (len(plain_text) % 5))
+            char_list += [24] * (5 - (len(plain_text) % 5))
         return char_list
 
     def _characterize(self, char_list):
@@ -128,7 +113,8 @@ class Solitaire():
         for i in char_list:
             # Add back 65 to map into capital alpha characters.
             plain_text += chr(i + 64)
-        plain_text = ' '.join(plain_text[i:i + 5] for i in range(0, len(plain_text), 5))
+        plain_text = ' '.join(plain_text[i:i + 5]
+                              for i in range(0, len(plain_text), 5))
         return plain_text
 
     def _scramble(self, i, key):
@@ -213,7 +199,6 @@ class Solitaire():
             top_card = self.J0
         key = self.deck[top_card]
         # If the keystream card is a joker then start over from step one.
-        print(key)
         if key == self.J0 or key == self.J1:
             return self._solitaire()
         else:
@@ -221,6 +206,7 @@ class Solitaire():
 
     def encode(self, msg):
         """Takes a string message and encodes it."""
+        self.deck = list(self.key)
         enc = []
         for element in self._enumerate(msg):
             key = self._solitaire()
@@ -229,6 +215,7 @@ class Solitaire():
 
     def decode(self, enc):
         """Take a string encoded message and decodes it."""
+        self.deck = list(self.key)
         msg = []
         for element in self._enumerate(enc):
             key = self._solitaire()
