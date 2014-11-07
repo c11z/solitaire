@@ -15,14 +15,14 @@ passphrase = 'cryptonomicon'
 solitaire = Solitaire(passphrase=passphrase)
 print(solitaire.get_key())
 print(solitaire.get_deck())
-msg = 'Oh Mary had a little lambabcde'
+msg = 'Oh Mary had a little lamb'
 enc\_msg = solitaire.encode(msg)
 dec\_msg = solitaire.decode(enc_msg)
 assert ''.join(msg.upper().split()) == ''.join(dec_msg.split())
 ```
 
 ## Hello Hacker School
-This library was written as an example of programming prowess for my Hacker School application. In that regard I had to walk a fine line between effort, charm and performance. You should not use this for real spycraft. It is simply not tested rigorously enough.
+This library was written as an example of programming prowess for my Hacker School application. In that regard I had to walk a fine line between effort, charm and performance. You should not use this for real spycraft, it is simply not tested rigorously enough.
 
 ## Testing
 Run tests in command line by:

@@ -55,7 +55,7 @@ class Solitaire():
         return tuple(self.deck)
 
     def _valid_key(self, key):
-        """Returns True is key is valid else false."""
+        """Returns True if the key is valid else false."""
         key = set(key)
         for i in range(1, 55):
             if i not in key:
@@ -66,9 +66,9 @@ class Solitaire():
         """Returns the key in list form."""
         return self.key
 
-    def get_deck(self):
-        """Converts the key to a representation that can be used to easily be
-        saved as the order of a standard deck of cards.
+    def get_cards(self):
+        """Converts the key to a representation that can be used to easily
+        order a physical deck of cards.
         """
         conv = {1: 'AC', 2: '2C', 3: '3C', 4: '4C', 5: '5C', 6: '6C', 7: '7C',
                 8: '8C', 9: '9C', 10: '10C', 11: 'JC', 12: 'QC', 13: 'KC',
@@ -87,7 +87,7 @@ class Solitaire():
 
     def _enumerate(self, plain_text):
         """Capitalize and convert a string into a list of numbers,
-        A=1, B=2 etc
+        A=1, B=2 etc. Strip out non alpha characters.
         """
         char_list = []
         for character in list(plain_text):
@@ -106,8 +106,8 @@ class Solitaire():
         return char_list
 
     def _characterize(self, char_list):
-        """Convert list of numbers to letters, 1=A, 2=B etc convert to a
-        string, stick with 5 character groups.
+        """Convert list of numbers to letters, 1=A, 2=B etc to a
+        string, split into 5 character groups.
         """
         plain_text = ''
         for i in char_list:
@@ -119,8 +119,8 @@ class Solitaire():
 
     def _scramble(self, i, key):
         """"Takes the integer representation of a character of the plaintext
-        message {i} and performs the addition modulo 26 step with the keystream
-        modifier {key}.
+        message {i} and adds the keystream integer {key}. Modulo 26 but cannot
+        use the modulo operator since we are using array index 1.
         """
         if key > 26:
             key -= 26
@@ -130,9 +130,9 @@ class Solitaire():
         return value
 
     def _clarify(self, i, key):
-        """Takes the integer representation of a character of the encoded
-        message {i} and performs the subtraction modulo 26 step with the
-        keystream modifier {key}.
+        """Takes the integer representation of a character of the encoded text
+        message {i} and subtracts the keystream integer {key}. Modulo 26 but
+        cannot use the modulo operator since we are using array index 1.
         """
         if key > 26:
             key -= 26
@@ -152,9 +152,9 @@ class Solitaire():
         self.deck.insert(new_index, self.deck.pop(index))
 
     def _triple_cut(self):
-        """Determine cutpoints by isolating cards before the first joken and
-        after the second find top, middle and bottom of deck. Then swap top
-        and bottom.
+        """Determine cutpoints by isolating cards before the first joker and
+        after the second joker. Seperate top, middle and bottom of deck. Then
+        swap top and bottom.
         """
         #Determine cut points
         j0_index = self.deck.index(self.J0)
@@ -167,7 +167,7 @@ class Solitaire():
         self.deck = bottom + middle + top
 
     def _count_cut(self, manual_cut_point=None):
-        """Look at the bottom card cound down from the top card that number,
+        """Look at the bottom card, count down from the top card that number,
         cut after that card leaving the bottom card on the bottom. If the
         bottom card is a joker do nothing.
         """
@@ -188,7 +188,7 @@ class Solitaire():
             self.deck = bottom + top + [bottom_card]
 
     def _solitaire(self):
-        """Plays the game of solitaire, generating one keystream character."""
+        """Plays the game of solitaire. Generates one keystream character."""
         self._move_card(self.J0, 1)
         self._move_card(self.J1, 2)
         self._triple_cut()
@@ -205,7 +205,7 @@ class Solitaire():
             return key
 
     def encode(self, msg):
-        """Takes a string message and encodes it."""
+        """Takes a message as a string and returns an encoded string."""
         self.deck = list(self.key)
         enc = []
         for element in self._enumerate(msg):
@@ -214,7 +214,7 @@ class Solitaire():
         return self._characterize(enc)
 
     def decode(self, enc):
-        """Take a string encoded message and decodes it."""
+        """Take a encoded message string and returns a decoded string."""
         self.deck = list(self.key)
         msg = []
         for element in self._enumerate(enc):
@@ -224,7 +224,7 @@ class Solitaire():
 
 
 class TestSolitaire():
-    """Test Class for solitaire program."""
+    """Test Class for Solitaire class."""
 
     def test_encode(self):
         """Tests encode method."""
@@ -248,11 +248,10 @@ class TestSolitaire():
         solitaire = Solitaire(key)
         assert tuple(range(1, 55)) == solitaire.get_key()
 
-    def test_get_deck(self):
-        """"Tests get deck method."""
+    def test_get_cards(self):
+        """"Tests get cards method."""
         solitaire = Solitaire(passphrase='foo')
-        solitaire.get_deck()
-        print(solitaire.get_deck())
+        solitaire.get_cards()
         deck = ['JS', 'QS', '3C', '4C', '5C', '6C', '7C', 'AC', '10C', 'JC',
                 'QC', 'KS', '2D', '3D', '4D', '5D', '6D', '7D', '8D', '2C',
                 'JD', 'QD', 'KD', 'AH', '2H', '3H', '4H', '5H', '6H', '7H',
@@ -265,7 +264,6 @@ class TestSolitaire():
         """Tests decode method."""
         solitaire = Solitaire(passphrase='foo')
         enc = solitaire.encode('AAAAA AAAAA AAAAA')
-        print(solitaire.get_key())
         key = (50, 51, 3, 4, 5, 6, 7, 1, 10, 11, 12, 52, 15, 16, 17, 18, 19,
                20, 21, 2, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
                37, 38, 39, 40, 8, 53, 13, 14, 22, 23, 54, 41, 42, 43, 44, 45,
@@ -274,6 +272,7 @@ class TestSolitaire():
         assert enc == 'TIKJJ RQZRK BBZNA'
 
     def test_mary_had_a_little_lamb(self):
+        """Just checking that my example works."""
         passphrase = 'cryptonomicon'
         solitaire = Solitaire(passphrase=passphrase)
         # print(solitaire.get_key())
@@ -286,4 +285,3 @@ class TestSolitaire():
 
 if __name__ == '__main__':
     pytest.main('solitaire.py')
-gst
