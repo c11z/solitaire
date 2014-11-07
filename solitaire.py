@@ -5,30 +5,20 @@ Solitaire is an output-feedback mode stream cipher. Invented by Bruce Schneier
 and popularized by Neal Stephenson. Described in Schneiers words
 https://www.schneier.com/solitaire.html
 
-Commandline usage:
+Usage:
 
-$ python3 solitaire.py -e message.txt key.txt
-
-$ python3 solitaire.py -d message.txt key.txt
-
--e == --encrypt
--d == --decrypt
-
-key.txt file optional but recommended, it ommitted it will be generated using a
-weak pseudo random number generator.
-
-Library usage:
-
-solitaire = Solitaire() # Key is automatically generated
-print solitaire.get_key()
-msg = 'Mary had a little lamb'
-enc_msg = solitaire.encrypt(msg)
-dec_msg = solitaire.decrypt(enc_msg)
-assert ''.join.split(msg.upper()) == ''.join.split(dec_msg)
+passphrase = 'cryptonomicon'
+solitaire = Solitaire(passphrase=passphrase)
+print(solitaire.get_key())
+print(solitaire.get_deck())
+msg = 'Oh Mary had a little lambabcde'
+enc_msg = solitaire.encode(msg)
+dec_msg = solitaire.decode(enc_msg)
+assert ''.join(msg.upper().split()) == ''.join(dec_msg.split())
 """
-import argparse
+
 import pytest
-from random import shuffle
+
 
 class Solitaire():
     """Output-feedback mode stream cypher designed around a deck of cards."""
@@ -275,6 +265,5 @@ class TestSolitaire():
         assert enc == 'ITHZU JIWGR FARMW'
 
 if __name__ == '__main__':
-    # parse arguments for command line usage
-    parser = argparse.ArgumentParser()
-    parser.parse_args()
+    pytest.main('solitaire.py')
+gst

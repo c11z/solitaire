@@ -1,2 +1,1 @@
-argparse==1.2.1
 pytest==2.6.3
