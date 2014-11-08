@@ -11,7 +11,7 @@ passphrase = 'cryptonomicon'
 solitaire = Solitaire(passphrase=passphrase)
 print(solitaire.get_key())
 print(solitaire.get_deck())
-msg = 'Oh Mary had a little lambabcde'
+msg = 'Oh Mary had a little lamb'
 enc_msg = solitaire.encode(msg)
 dec_msg = solitaire.decode(enc_msg)
 assert ''.join(msg.upper().split()) == ''.join(dec_msg.split())
@@ -258,7 +258,7 @@ class TestSolitaire():
                 '8H', '9H', '10H', 'JH', 'QH', 'KH', 'AS', '8C', 'J0', 'KC',
                 'AD', '9D', '10D', 'J1', '2S', '3S', '4S', '5S', '6S', '7S',
                 '8S', '9S', '10S', '9C']
-        assert deck == solitaire.get_deck()
+        assert deck == solitaire.get_cards()
 
     def test_use_passphrase(self):
         """Tests decode method."""
@@ -277,7 +277,7 @@ class TestSolitaire():
         solitaire = Solitaire(passphrase=passphrase)
         # print(solitaire.get_key())
         # print(solitaire.get_deck())
-        msg = 'Oh Mary had a little lambabcde'
+        msg = 'Oh Mary had a little lamb'
         enc_msg = solitaire.encode(msg)
         dec_msg = solitaire.decode(enc_msg)
         assert ''.join(msg.upper().split()) == ''.join(dec_msg.split())
